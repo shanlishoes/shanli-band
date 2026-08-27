@@ -21,12 +21,12 @@ async function sheet(){
 }
 export async function POST(req:Request){
   try{
-    const body=await req.json(); const {staffId,hours,edit}=body
+    const body=await req.json(); const {staffId,hours,dateKey}=body
     const person=staff[staffId]
     if(!person) return NextResponse.json({error:'پرسنل معتبر نیست.'},{status:400})
     const n=Number(hours); if(!Number.isInteger(n)||n<0) return NextResponse.json({error:'تعداد کارکرد باید عدد صحیح و صفر یا بیشتر باشد.'},{status:400})
     if (process.env.APPS_SCRIPT_URL) {
-      const response = await fetch(process.env.APPS_SCRIPT_URL, {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({staffId,hours:n,edit})})
+      const response = await fetch(process.env.APPS_SCRIPT_URL, {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({staffId,hours:n,dateKey})})
       const result = await response.json()
       if (!response.ok || result.error) return NextResponse.json(result,{status:response.status||400})
       return NextResponse.json({ok:true})
@@ -38,7 +38,7 @@ export async function POST(req:Request){
     if(index<0) return NextResponse.json({error:`ردیف امروز (${date.key}) در جدول پیدا نشد.`},{status:404})
     const row=index+2
     const current=rows[index][person.column==='C'?2:person.column==='D'?3:4]
-    if(current!==undefined && String(current).trim()!=='' && !edit) return NextResponse.json({error:'کارکرد امروز شما قبلاً ثبت شده است.'},{status:409})
+    if(current!==undefined && String(current).trim()!=='') return NextResponse.json({error:'کارکرد امروز شما قبلاً ثبت شده است.'},{status:409})
     await api.spreadsheets.values.batchUpdate({spreadsheetId:process.env.GOOGLE_SHEET_ID!,requestBody:{valueInputOption:'USER_ENTERED',data:[
       {range:`${tab}!${person.column}${row}`,values:[[n]]},
       {range:`${tab}!F${row}`,values:[[`=SUM(C${row}:E${row})`]]}
