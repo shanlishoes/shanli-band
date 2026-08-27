@@ -11,7 +11,7 @@ const monthNames=['فروردین','اردیبهشت','خرداد','تیر','م�
 function today(){
   const parts=new Intl.DateTimeFormat('en-US-u-ca-persian',{timeZone:process.env.APP_TIMEZONE||'Asia/Tehran',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date())
   const get=(type:string)=>parts.find(p=>p.type===type)?.value||''
-  return {key:`${get('month')}/${get('day')}`, month:monthNames[Number(get('month'))-1], day:get('day')}
+  return {key:`${get('year')}/${get('month')}/${get('day')}`, legacyKey:`${get('month')}/${get('day')}`, month:monthNames[Number(get('month'))-1], day:get('day')}
 }
 async function sheet(){
   const raw=process.env.GOOGLE_SERVICE_ACCOUNT_JSON
