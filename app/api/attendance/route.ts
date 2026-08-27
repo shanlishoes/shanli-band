@@ -24,7 +24,7 @@ export async function POST(req:Request){
     const body=await req.json(); const {staffId,hours}=body
     const person=staff[staffId]
     if(!person) return NextResponse.json({error:'پرسنل معتبر نیست.'},{status:400})
-    const n=Number(hours); if(!Number.isFinite(n)||n<0||n>24) return NextResponse.json({error:'مقدار کارکرد باید بین ۰ تا ۲۴ ساعت باشد.'},{status:400})
+    const n=Number(hours); if(!Number.isInteger(n)||n<0) return NextResponse.json({error:'تعداد کارکرد باید عدد صحیح و صفر یا بیشتر باشد.'},{status:400})
     if (process.env.APPS_SCRIPT_URL) {
       const response = await fetch(process.env.APPS_SCRIPT_URL, {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({staffId,hours:n})})
       const result = await response.json()
