@@ -17,13 +17,13 @@ export default function Home() {
   const [loading,setLoading]=useState(false)
   const [error,setError]=useState('')
   const [done,setDone]=useState<string[]>([])
-  useEffect(()=>{ const x=localStorage.getItem('submitted-today'); if(x) setDone(JSON.parse(x)) },[])
+  useEffect(()=>{ const x=localStorage.getItem('submitted-today'); if(x){ try { const saved=JSON.parse(x); if(saved.date===todayKey) setDone(saved.ids||[]); else localStorage.removeItem('submitted-today'); } catch { localStorage.removeItem('submitted-today'); } } },[])
   async function submit(e:React.FormEvent){
     e.preventDefault(); if(!selected) return; setError('');
     const value=Number(hours); if(!Number.isInteger(value) || value<0){setError('لطفاً تعداد صحیح و صفر یا بیشتر وارد کنید.');return}
     setLoading(true)
     try { const r=await fetch('/api/attendance',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({staffId:selected.id,hours:value,dateKey:todayKey})}); const d=await r.json(); if(!r.ok) throw new Error(d.error||'ثبت انجام نشد');
-      const next=[...done,selected.id]; setDone(next); localStorage.setItem('submitted-today',JSON.stringify(next)); setSent(true)
+      const next=[...done,selected.id]; setDone(next); localStorage.setItem('submitted-today',JSON.stringify({date:todayKey,ids:next})); setSent(true)
     } catch(e:any){setError(e.message)} finally{setLoading(false)}
   }
   if(sent) return <main className="shell"><div className="topbar"><div className="brand"><div className="logo">✓</div><div><b>کارکردینو</b><small>ثبت کارکرد روزانه</small></div></div></div><section className="card success"><div className="successIcon">✓</div><h1>با موفقیت ثبت شد</h1><p>کارکرد <b>{selected?.name}</b> برای امروز در جدول ذخیره شد.</p><div className="receipt"><span>تاریخ</span><b>{today}</b><span>مقدار کارکرد</span><b>{hours} عدد</b></div><button className="secondary" onClick={()=>{setSelected(null);setSent(false);setHours('')}}>بازگشت به صفحه اصلی</button></section><footer>ثبت هر نفر، فقط یک‌بار در روز امکان‌پذیر است.</footer></main>
